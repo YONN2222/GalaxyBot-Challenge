@@ -31,4 +31,6 @@ cluster.onSelfDestruct = async () => {
     await client.destroy();
 };
 
-client.login(cluster.token);
+client.login(cluster.token)
+    .then(() => console.log("Logged in successfully!"))
+    .catch(err => console.error("Error while logging in:", err));
