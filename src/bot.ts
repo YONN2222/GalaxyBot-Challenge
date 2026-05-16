@@ -1,5 +1,6 @@
 import { Cluster } from "galactic.ts";
-import { Client, GatewayIntentBits, type ClientOptions } from "discord.js";
+import { Client, GatewayIntentBits, type ClientOptions, MessageFlags } from "discord.js";
+import { loadCommands, commands } from "./Commands";
 
 export class ExtendedClient extends Client {
     cluster: Cluster<ExtendedClient>;
@@ -23,8 +24,46 @@ const client = new ExtendedClient(
 
 cluster.client = client;
 
-client.once("clientReady", () => {
-    console.log(`Ready as ${client.user?.tag}, Cluster ${cluster.clusterID}`);
+client.once("clientReady", async () => {
+    // load commands
+    await loadCommands();
+    const slashCommands = commands.map((cmd) => cmd.data.toJSON());
+    await client.application?.commands.set(slashCommands);
+
+    console.log(`Ready as ${client.user?.tag}, Cluster ${cluster.clusterID}, ${commands.length} commands loaded`);
+});
+
+// command handler
+client.on("interactionCreate", async (interaction) => {
+    if (!interaction.isCommand()) return;
+
+    const command = commands.find(
+        (cmd) => cmd.data.name === interaction.commandName
+    );
+    if (!command) {
+        await interaction.reply({
+            content: "Unknown Command ",
+            flags: MessageFlags.Ephemeral,
+        });
+        return;
+    }
+
+    try {
+        if (interaction.isChatInputCommand()) {
+            await command.execute(interaction);
+        } else {
+            await interaction.reply({
+                content: "This command is not available.",
+                flags: MessageFlags.Ephemeral
+            });
+        }
+    } catch (err) {
+        console.error(err);
+        await interaction.reply({
+            content: "There was an error, so yeah be sad.",
+            flags: MessageFlags.Ephemeral
+        });
+    }
 });
 
 cluster.onSelfDestruct = async () => {
