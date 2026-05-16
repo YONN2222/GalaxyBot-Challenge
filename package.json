@@ -1,12 +1,23 @@
 {
   "name": "galaxybot-challenge",
-  "module": "index.ts",
+  "version": "1.0.0",
   "type": "module",
-  "private": true,
-  "devDependencies": {
-    "@types/bun": "latest"
+  "scripts": {
+    "start": "node dist/index.mjs",
+    "build": "tsdown",
+    "dev": "tsx watch src/bot.ts"
   },
-  "peerDependencies": {
-    "typescript": "^5"
+  "dependencies": {
+    "discord.js": "^14.26.4",
+    "dotenv": "^17.4.2",
+    "galactic.ts": "^2.1.5",
+    "sequelize": "^6.37.8",
+    "sqlite3": "^6.0.1",
+    "typescript": "^6.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "latest",
+    "tsdown": "^0.22.0",
+    "tsx": "^4.22.0"
   }
 }
