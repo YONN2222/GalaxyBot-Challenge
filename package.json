@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "start": "node dist/index.mjs",
+    "start": "bun dist/index.mjs",
     "build": "tsdown",
-    "dev": "tsx watch src/bot.ts"
+    "dev": "bun src/index.ts"
   },
   "dependencies": {
     "discord.js": "^14.26.4",
@@ -16,8 +16,7 @@
     "typescript": "^6.0.3"
   },
   "devDependencies": {
-    "@types/node": "latest",
-    "tsdown": "^0.22.0",
-    "tsx": "^4.22.0"
+    "@types/bun": "latest",
+    "tsdown": "^0.22.0"
   }
 }

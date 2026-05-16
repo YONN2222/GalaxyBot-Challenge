@@ -1,14 +1,34 @@
-import { Client, GatewayIntentBits, MessageFlags } from "discord.js";
-import dotenv from "dotenv";
+import { Cluster } from "galactic.ts";
+import { Client, GatewayIntentBits, type ClientOptions } from "discord.js";
 
-dotenv.config();
+export class ExtendedClient extends Client {
+    cluster: Cluster<ExtendedClient>;
 
-const client = new Client({
-    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent],
+    constructor(options: ClientOptions, cluster: Cluster<ExtendedClient>) {
+        super(options);
+        this.cluster = cluster;
+    }
+}
+
+const cluster = Cluster.initial<ExtendedClient>();
+
+const client = new ExtendedClient(
+    {
+        shards: cluster.shardList,
+        shardCount: cluster.totalShards,
+        intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent],
+    },
+    cluster,
+);
+
+cluster.client = client;
+
+client.once("clientReady", () => {
+    console.log(`Ready as ${client.user?.tag}, Cluster ${cluster.clusterID}`);
 });
 
-client.once('clientReady', async () => {
-    console.log(`Bot is ready as ${client.user?.tag}!`)
-})
+cluster.onSelfDestruct = async () => {
+    await client.destroy();
+};
 
-client.login(process.env.BOT_TOKEN)
+client.login(cluster.token);
