@@ -1,6 +1,7 @@
 import { Cluster } from "galactic.ts";
 import { Client, GatewayIntentBits, type ClientOptions, MessageFlags } from "discord.js";
 import { loadCommands, commands } from "./Utils/CommandBuilder";
+import { loadSubCommands } from "./Utils/SubCommandBuilder";
 import { db } from "./Database/DatabaseManager";
 
 export class ExtendedClient extends Client {
@@ -35,10 +36,15 @@ client.once("clientReady", async () => {
 
     // load commands
     await loadCommands();
+    await loadSubCommands(commands);
     const slashCommands = commands.map((cmd) => cmd.data.toJSON());
+    const totalLoadedCommands = commands.reduce(
+        (total, command) => total + 1 + command.subCommands.size,
+        0,
+    );
     await client.application?.commands.set(slashCommands);
 
-    console.log(`Ready as ${client.user?.tag}, Cluster ${cluster.clusterID}, ${commands.length} commands loaded`);
+    console.log(`Ready as ${client.user?.tag}, Cluster ${cluster.clusterID}, ${totalLoadedCommands} commands loaded`);
 });
 
 // command handler
@@ -58,7 +64,19 @@ client.on("interactionCreate", async (interaction) => {
 
     try {
         if (interaction.isChatInputCommand()) {
-            await command.execute(interaction);
+            const subCommandName = interaction.options.getSubcommand(false);
+            const subCommand = subCommandName ? command.subCommands.get(subCommandName) : undefined;
+
+            if (subCommand) {
+                await subCommand.execute(interaction);
+            } else if (command.execute) {
+                await command.execute(interaction);
+            } else {
+                await interaction.reply({
+                    content: "This command requires a subcommand.",
+                    flags: MessageFlags.Ephemeral,
+                });
+            }
         } else {
             await interaction.reply({
                 content: "This command is not available.",
