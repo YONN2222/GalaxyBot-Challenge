@@ -144,3 +144,8 @@ vite.config.ts.timestamp-*
 
 # ide
 .idea
+
+# database
+*.db
+*.sqlite
+*.sqlite3

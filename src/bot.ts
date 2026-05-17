@@ -1,6 +1,7 @@
 import { Cluster } from "galactic.ts";
 import { Client, GatewayIntentBits, type ClientOptions, MessageFlags } from "discord.js";
 import { loadCommands, commands } from "./Commands";
+import { db } from "./Database/DatabaseManager";
 
 export class ExtendedClient extends Client {
     cluster: Cluster<ExtendedClient>;
@@ -25,6 +26,13 @@ const client = new ExtendedClient(
 cluster.client = client;
 
 client.once("clientReady", async () => {
+    // database
+    try {
+        await db.init();
+    } catch (error) {
+        console.error("Error initializing database:", error);
+    }
+
     // load commands
     await loadCommands();
     const slashCommands = commands.map((cmd) => cmd.data.toJSON());
