@@ -13,13 +13,13 @@ export let commands: Command[] = [];
 export async function loadCommands() {
     const loaded: Command[] = [];
     const currentFileExtension = path.extname(fileURLToPath(import.meta.url));
+    const commandsDir = path.join(import.meta.dir, "..", "Commands");
 
-    for (const file of fs.readdirSync(import.meta.dir, { withFileTypes: true })) {
+    for (const file of fs.readdirSync(commandsDir, { withFileTypes: true })) {
         if (!file.isFile()) continue;
         if (!file.name.endsWith(currentFileExtension)) continue;
-        if (file.name === `index${currentFileExtension}`) continue;
 
-        const filePath = path.join(import.meta.dir, file.name);
+        const filePath = path.join(commandsDir, file.name);
         const mod = await import(pathToFileURL(filePath).href);
 
         if ("data" in mod && "execute" in mod) {

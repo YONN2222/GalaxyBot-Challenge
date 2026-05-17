@@ -1,6 +1,6 @@
 import { Cluster } from "galactic.ts";
 import { Client, GatewayIntentBits, type ClientOptions, MessageFlags } from "discord.js";
-import { loadCommands, commands } from "./Commands";
+import { loadCommands, commands } from "./Utils/CommandBuilder";
 import { db } from "./Database/DatabaseManager";
 
 export class ExtendedClient extends Client {
