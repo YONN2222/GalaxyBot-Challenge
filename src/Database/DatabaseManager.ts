@@ -1,5 +1,8 @@
 import { Sequelize } from "sequelize";
 
+// import models
+import { Incident } from "./Models/Incident";
+
 class DatabaseManager {
     public sequelize: Sequelize;
 
@@ -24,6 +27,8 @@ class DatabaseManager {
     }
 
     public async init() {
+        Incident.initialize(this.sequelize);
+
         try {
             await this.sequelize.authenticate();
             console.log("Database connected :)");
@@ -35,7 +40,6 @@ class DatabaseManager {
         } catch (error) {
             console.error("Error syncing database:", error);
         }
-
     }
 }
 
