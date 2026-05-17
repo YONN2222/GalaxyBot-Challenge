@@ -5,7 +5,8 @@
   "scripts": {
     "start": "bun dist/index.mjs",
     "build": "tsdown",
-    "dev": "bun src/index.ts"
+    "dev": "bun src/index.ts",
+    "dev:win": "bun src/windows-dev.ts"
   },
   "dependencies": {
     "discord.js": "^14.26.4",

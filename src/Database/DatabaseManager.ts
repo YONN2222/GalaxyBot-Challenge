@@ -1,4 +1,5 @@
 import { Sequelize } from "sequelize";
+import path from "node:path";
 
 // import models
 import { Incident } from "./Models/Incident";
@@ -7,10 +8,14 @@ class DatabaseManager {
     public sequelize: Sequelize;
 
     private constructor() {
+        const storage = process.platform === "win32"
+            ? path.resolve("database.sqlite")
+            : "./database.sqlite";
+
         this.sequelize = new Sequelize(
             {
                 dialect: "sqlite",
-                storage: "./database.sqlite",
+                storage,
                 logging: false
             }
         );
