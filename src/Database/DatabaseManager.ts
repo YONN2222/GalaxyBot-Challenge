@@ -3,6 +3,8 @@ import path from "node:path";
 
 // import models
 import { Incident } from "./Models/Incident";
+import { Appends } from "./Models/Appends";
+import { Config } from "./Models/Config";
 
 class DatabaseManager {
     public sequelize: Sequelize;
@@ -33,6 +35,8 @@ class DatabaseManager {
 
     public async init() {
         Incident.initialize(this.sequelize);
+        Appends.initialize(this.sequelize);
+        Config.initialize(this.sequelize);
 
         try {
             await this.sequelize.authenticate();
