@@ -17,6 +17,6 @@ const instance = new StandaloneInstance(
 );
 
 instance.start();
-console.log("is got here 1")
+
 process.on("SIGTERM", () => instance.shutdown().then(() => process.exit(0)));
 process.on("SIGINT", () => instance.shutdown().then(() => process.exit(0)));

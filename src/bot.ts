@@ -3,6 +3,7 @@ import { Client, GatewayIntentBits, type ClientOptions, MessageFlags } from "dis
 import { loadCommands, commands } from "./Utils/CommandBuilder";
 import { loadSubCommands } from "./Utils/SubCommandBuilder";
 import { db } from "./Database/DatabaseManager";
+import { handleModalSubmit } from "./Interactions/ModalHandler";
 
 export class ExtendedClient extends Client {
     cluster: Cluster<ExtendedClient>;
@@ -47,8 +48,12 @@ client.once("clientReady", async () => {
     console.log(`Ready as ${client.user?.tag}, Cluster ${cluster.clusterID}, ${totalLoadedCommands} commands loaded`);
 });
 
-// command handler
+// interaction handler
 client.on("interactionCreate", async (interaction) => {
+    if (interaction.isModalSubmit()) {
+        await handleModalSubmit(interaction);
+        return;
+    }
     if (!interaction.isCommand()) return;
 
     const command = commands.find(
