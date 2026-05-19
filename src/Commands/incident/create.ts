@@ -1,0 +1,36 @@
+import {
+    ChannelSelectMenuBuilder,
+    ChannelType,
+    ChatInputCommandInteraction,
+    LabelBuilder,
+    MessageFlags,
+    ModalBuilder,
+    RoleSelectMenuBuilder,
+    SlashCommandSubcommandBuilder,
+    type ModalSubmitInteraction, TextDisplayBuilder, ContainerBuilder,
+} from "discord.js";
+import { Incident } from "../../Database/Models/Incident";
+
+export const data = new SlashCommandSubcommandBuilder()
+    .setName("create")
+    .setDescription("Create an incident");
+
+export async function execute(interaction: ChatInputCommandInteraction) {
+    if (!interaction.guildId) {
+        const GuildTextComponent = new TextDisplayBuilder()
+            .setContent("This command can only be used in a server.");
+        const GuildContainer = new ContainerBuilder()
+            .addTextDisplayComponents(GuildTextComponent)
+
+        try {
+            await interaction.reply({
+                components: [GuildContainer],
+                flags: MessageFlags.IsComponentsV2
+            });
+        } catch (error) {
+            console.error("Error:", error);
+        }
+
+        return;
+    }
+}

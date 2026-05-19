@@ -17,14 +17,14 @@ export const data = new SlashCommandBuilder()
 
 export async function execute(interaction: ChatInputCommandInteraction) {
     if (!interaction.guildId) {
-        const TextComponent = new TextDisplayBuilder()
+        const GuildTextComponent = new TextDisplayBuilder()
             .setContent("This command can only be used in a server.");
-        const container = new ContainerBuilder()
-            .addTextDisplayComponents(TextComponent)
+        const GuildContainer = new ContainerBuilder()
+            .addTextDisplayComponents(GuildTextComponent)
 
         try {
             await interaction.reply({
-                components: [container],
+                components: [GuildContainer],
                 flags: MessageFlags.IsComponentsV2
             });
         } catch (error) {
@@ -128,4 +128,3 @@ export async function handleModalSubmit(interaction: ModalSubmitInteraction) {
         console.error("Error:", error);
     }
 }
-
