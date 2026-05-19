@@ -153,6 +153,12 @@ export async function handleModalSubmit(interaction: ModalSubmitInteraction) {
 		return;
 	}
 
+	try {
+		await incident.update({ status: "appended" });
+	} catch (error) {
+		console.error("Error updating incident status:", error);
+	}
+
 	const config = await Config.findOne({
 		where: { guildId: interaction.guildId },
 	});
