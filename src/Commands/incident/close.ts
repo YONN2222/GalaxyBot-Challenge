@@ -39,16 +39,16 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
     if (!incident) {
         await interaction.reply({
-            content: "Incident not found.",
-            flags: MessageFlags.Ephemeral,
+            components: [new ContainerBuilder().addTextDisplayComponents(new TextDisplayBuilder().setContent("Incident not found.")).setAccentColor(0xED4245)],
+            flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral,
         });
         return;
     }
 
     if (incident.status === "closed") {
         await interaction.reply({
-            content: "Incident is already closed.",
-            flags: MessageFlags.Ephemeral,
+            components: [new ContainerBuilder().addTextDisplayComponents(new TextDisplayBuilder().setContent("Incident is already closed.")).setAccentColor(0xED4245)],
+            flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral,
         });
         return;
     }
@@ -56,15 +56,15 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     const channel = await interaction.guild?.channels.fetch(config!.channelId);
     if (!channel || !channel.isSendable()) {
         await interaction.reply({
-            content: "Channel not found or not sendable.",
-            flags: MessageFlags.Ephemeral,
-        })
-        return
+            components: [new ContainerBuilder().addTextDisplayComponents(new TextDisplayBuilder().setContent("Channel not found or not sendable.")).setAccentColor(0xED4245)],
+            flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral,
+        });
+        return;
     }
 
     try {
         await incident.update({ status: "closed" });
-        const message = await channel?.messages.fetch(incident.messageId);
+        const message = await channel.messages.fetch(incident.messageId);
         const IncidentContainer = new ContainerBuilder()
             .addTextDisplayComponents(new TextDisplayBuilder().setContent(`### #${incident.id} Resolved Incident\n## ${incident.title}`))
             .addSeparatorComponents(new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small))
@@ -77,14 +77,13 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         });
 
         await interaction.reply({
-            content: "Incident closed successfully.",
-            flags: MessageFlags.Ephemeral,
+            components: [new ContainerBuilder().addTextDisplayComponents(new TextDisplayBuilder().setContent("Incident closed successfully.")).setAccentColor(0x57F287)],
+            flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral,
         });
     } catch (error) {
-        console.log("Error closing incident:", error);
         await interaction.reply({
-            content: "An error occurred while closing the incident.",
-            flags: MessageFlags.Ephemeral,
+            components: [new ContainerBuilder().addTextDisplayComponents(new TextDisplayBuilder().setContent("An error occurred while closing the incident.")).setAccentColor(0xED4245)],
+            flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral,
         });
     }
 }

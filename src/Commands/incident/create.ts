@@ -68,8 +68,8 @@ export async function handleModalSubmit(interaction: ModalSubmitInteraction) {
 
     if (!interaction.guildId) {
         await interaction.reply({
-            content: "This command can only be used in a server.",
-            flags: MessageFlags.Ephemeral,
+            components: [new ContainerBuilder().addTextDisplayComponents(new TextDisplayBuilder().setContent("This command can only be used in a server.")).setAccentColor(0xED4245)],
+            flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral,
         });
         return;
     }
@@ -79,8 +79,8 @@ export async function handleModalSubmit(interaction: ModalSubmitInteraction) {
 
     if (!title || !description) {
         await interaction.reply({
-            content: "Please enter a Title and a Description,,",
-            flags: MessageFlags.Ephemeral,
+            components: [new ContainerBuilder().addTextDisplayComponents(new TextDisplayBuilder().setContent("Please enter a Title and a Description.")).setAccentColor(0xED4245)],
+            flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral,
         });
         return;
     }
@@ -102,10 +102,10 @@ export async function handleModalSubmit(interaction: ModalSubmitInteraction) {
     } catch (error) {
         console.log("Error creating incident:", error);
         await interaction.reply({
-            content: "An error occurred while creating the incident.",
-            flags: MessageFlags.Ephemeral,
+            components: [new ContainerBuilder().addTextDisplayComponents(new TextDisplayBuilder().setContent("An error occurred while creating the incident.")).setAccentColor(0xED4245)],
+            flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral,
         });
-        return
+        return;
     }
 
     const IncidentContainer = new ContainerBuilder()
