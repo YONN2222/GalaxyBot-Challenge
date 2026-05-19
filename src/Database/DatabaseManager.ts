@@ -45,7 +45,7 @@ class DatabaseManager {
             console.error("Error authenticating database:", error);
         }
         try {
-            await this.sequelize.sync();
+            await this.sequelize.sync({ alter: true });
         } catch (error) {
             console.error("Error syncing database:", error);
         }

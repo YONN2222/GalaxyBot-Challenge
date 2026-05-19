@@ -90,16 +90,37 @@ export async function handleModalSubmit(interaction: ModalSubmitInteraction) {
     const channel = await interaction.client.channels.fetch(config.channelId);
     if (!channel || !channel.isTextBased() || !channel.isSendable()) return;
 
+    let incident;
+
+    try {
+        incident = await Incident.create({
+            guildId: interaction.guildId,
+            title: title,
+            description: description,
+            status: "open"
+        })
+    } catch (error) {
+        console.log("Error creating incident:", error);
+        await interaction.reply({
+            content: "An error occurred while creating the incident.",
+            flags: MessageFlags.Ephemeral,
+        });
+        return
+    }
+
     const IncidentContainer = new ContainerBuilder()
-        .addTextDisplayComponents(new TextDisplayBuilder().setContent(`### New Incident\n## ${title}`))
+        .addTextDisplayComponents(new TextDisplayBuilder().setContent(`### #${incident.id} New Incident\n## ${title}`))
         .addSeparatorComponents(new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small))
         .addTextDisplayComponents(new TextDisplayBuilder().setContent(description))
         .setAccentColor(0xF8312F)
+
     try {
-        await channel.send({
+        const message = await channel.send({
             components: [IncidentContainer],
             flags: MessageFlags.IsComponentsV2
         });
+
+        await incident.update({ messageId: message.id });
 
         const SuccessfulCreteTextComponent = new TextDisplayBuilder()
             .setContent("Incident created successfully!");
@@ -114,23 +135,4 @@ export async function handleModalSubmit(interaction: ModalSubmitInteraction) {
     } catch (error) {
         console.error("Error:", error);
     }
-
-
-    // try {
-    //     await Config.upsert({
-    //         guildId: interaction.guildId,
-    //         roleId: role.id,
-    //         channelId: channel.id,
-    //     })
-    // } catch (error) {
-    //     console.log("Error saving configuration:", error);
-    //     await interaction.reply({
-    //         content: "An error occurred while saving the configuration.",
-    //         flags: MessageFlags.Ephemeral,
-    //     });
-    //     return
-    // }
-
-
-
 }

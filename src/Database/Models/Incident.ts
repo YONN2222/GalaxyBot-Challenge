@@ -5,8 +5,8 @@ export class Incident extends Model<InferAttributes<Incident>, InferCreationAttr
     declare guildId: string;
     declare title: string;
     declare description: string;
-    declare messageId: string;
-    declare status: string;
+    declare messageId: CreationOptional<string>;
+    declare status: "open" | "closed" | "appended";
 
     static initialize(sequelize: Sequelize) {
         Incident.init({
@@ -14,8 +14,14 @@ export class Incident extends Model<InferAttributes<Incident>, InferCreationAttr
             guildId: { type: DataTypes.STRING, allowNull: false },
             title: { type: DataTypes.STRING, allowNull: false },
             description: { type: DataTypes.TEXT, allowNull: false },
-            messageId: { type: DataTypes.STRING, allowNull: false },
-            status: { type: DataTypes.STRING, allowNull: false },
+            messageId: { type: DataTypes.STRING, allowNull: true },
+            status: {
+                type: DataTypes.STRING,
+                allowNull: false,
+                validate: {
+                    isIn: [["open", "closed", "appended"]]
+                }
+            },
         }, {
             sequelize,
             tableName: "incidents",
