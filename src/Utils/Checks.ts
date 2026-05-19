@@ -1,6 +1,7 @@
 import {
     type ChatInputCommandInteraction,
     ContainerBuilder,
+    GuildMember,
     MessageFlags,
     PermissionFlagsBits,
     TextDisplayBuilder
@@ -28,7 +29,7 @@ export async function GuildCheck(interaction: ChatInputCommandInteraction): Prom
     return true;
 }
 
-export async function PermissionCheck(interaction: ChatInputCommandInteraction): Promise<boolean> {
+export async function ConfigPermissionCheck(interaction: ChatInputCommandInteraction): Promise<boolean> {
     if (!interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)) {
         const NoPermissionTextComponent = new TextDisplayBuilder()
             .setContent("You dont have Permission to use this command.");
@@ -68,4 +69,26 @@ export async function ConfigCheck(interaction: ChatInputCommandInteraction, conf
         return false;
     }
     return true;
+}
+
+export async function IncidentPermissionCheck(interaction: ChatInputCommandInteraction, config: Config): Promise<boolean> {
+    if (!interaction.member || !(interaction.member instanceof GuildMember)) return false;
+    const member = interaction.member;
+    if (!member.roles.cache.has(config.roleId)) {
+        const NoPermissionTextComponent = new TextDisplayBuilder()
+            .setContent("You dont have Permission to use this command.");
+        const NoPermissionContainer = new ContainerBuilder()
+            .addTextDisplayComponents(NoPermissionTextComponent)
+        try {
+            await interaction.reply({
+                components: [NoPermissionContainer],
+                flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral
+            });
+        } catch (error) {
+            console.error("Error:", error);
+        }
+        return false;
+    }
+    return true;
+
 }

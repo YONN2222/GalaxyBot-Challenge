@@ -11,7 +11,7 @@ import {
     TextDisplayBuilder,
     ContainerBuilder } from "discord.js";
 import { Config } from "../Database/Models/Config";
-import { GuildCheck, PermissionCheck } from "../Utils/Checks";
+import { GuildCheck, ConfigPermissionCheck } from "../Utils/Checks";
 
 export const data = new SlashCommandBuilder()
     .setName("config")
@@ -22,7 +22,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     if (!await GuildCheck(interaction)) return;
 
     // permission check
-    if (!await PermissionCheck(interaction)) return;
+    if (!await ConfigPermissionCheck(interaction)) return;
 
 
     const modal = new ModalBuilder()
