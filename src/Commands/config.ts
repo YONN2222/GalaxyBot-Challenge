@@ -9,51 +9,21 @@ import {
     SlashCommandBuilder,
     type ModalSubmitInteraction,
     TextDisplayBuilder,
-    ContainerBuilder,
-    PermissionFlagsBits
-} from "discord.js";
+    ContainerBuilder } from "discord.js";
 import { Config } from "../Database/Models/Config";
+import { GuildCheck, PermissionCheck } from "../Utils/Checks";
 
 export const data = new SlashCommandBuilder()
     .setName("config")
     .setDescription("Configure the bot");
 
 export async function execute(interaction: ChatInputCommandInteraction) {
-    if (!interaction.guildId) {
-        const GuildTextComponent = new TextDisplayBuilder()
-            .setContent("This command can only be used in a server.");
-        const GuildContainer = new ContainerBuilder()
-            .addTextDisplayComponents(GuildTextComponent)
+    // guild check
+    if (!await GuildCheck(interaction)) return;
 
-        try {
-            await interaction.reply({
-                components: [GuildContainer],
-                flags: MessageFlags.IsComponentsV2
-            });
-        } catch (error) {
-            console.error("Error:", error);
-        }
-
-        return;
-    }
     // permission check
-    if (!interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)) {
-        const NoPermissionTextComponent = new TextDisplayBuilder()
-            .setContent("You dont have Permission to use this command.");
-        const NoPermissionContainer = new ContainerBuilder()
-            .addTextDisplayComponents(NoPermissionTextComponent)
+    if (!await PermissionCheck(interaction)) return;
 
-        try {
-            await interaction.reply({
-                components: [NoPermissionContainer],
-                flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral
-            });
-        } catch (error) {
-            console.error("Error:", error);
-        }
-
-        return;
-    }
 
     const modal = new ModalBuilder()
         .setCustomId("config-modal")
@@ -88,8 +58,6 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
     await interaction.showModal(modal);
 }
-
-export default execute
 
 export async function handleModalSubmit(interaction: ModalSubmitInteraction) {
     if (interaction.customId !== "config-modal") return;
