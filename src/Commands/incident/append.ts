@@ -3,29 +3,157 @@ import {
     MessageFlags,
     SlashCommandSubcommandBuilder,
     TextDisplayBuilder,
-    ContainerBuilder,
+    ContainerBuilder, ModalBuilder, LabelBuilder, TextInputBuilder, TextInputStyle, type ModalSubmitInteraction, SeparatorBuilder, SeparatorSpacingSize
 } from "discord.js";
+import { ConfigCheck, GuildCheck, IncidentPermissionCheck } from "../../Utils/Checks";
+import { Config } from "../../Database/Models/Config";
+import { Incident } from "../../Database/Models/Incident";
+import { Appends } from "../../Database/Models/Appends";
 
 export const data = new SlashCommandSubcommandBuilder()
     .setName("append")
-    .setDescription("Add a message to an incident");
+    .setDescription("Add a message to an incident")
+    .addIntegerOption(option =>
+        option
+            .setName("id")
+            .setDescription("The ID of the incident to close")
+            .setRequired(true)
+    );
 
 export async function execute(interaction: ChatInputCommandInteraction) {
-    if (!interaction.guildId) {
-        const GuildTextComponent = new TextDisplayBuilder()
-            .setContent("This command can only be used in a server.");
-        const GuildContainer = new ContainerBuilder()
-            .addTextDisplayComponents(GuildTextComponent)
+    // guild check
+    if (!await GuildCheck(interaction)) return;
 
-        try {
-            await interaction.reply({
-                components: [GuildContainer],
-                flags: MessageFlags.IsComponentsV2
-            });
-        } catch (error) {
-            console.error("Error:", error);
-        }
+    // get config
+    const config = await Config.findOne({ where: { guildId: interaction.guildId! } });
 
+    // config check
+    if (!await ConfigCheck(interaction, config)) return;
+
+    // permission check
+    if (!await IncidentPermissionCheck(interaction, config!)) return;
+
+    const id = interaction.options.getInteger("id", true);
+    if (!id) return;
+
+    const incident = await Incident.findOne({ where: { id: id } });
+
+    if (!incident) {
+        await interaction.reply({
+            content: "Incident not found.",
+            flags: MessageFlags.Ephemeral,
+        });
         return;
     }
+
+    if (incident.status === "closed") {
+        await interaction.reply({
+            content: "Incident is already closed.",
+            flags: MessageFlags.Ephemeral,
+        });
+        return;
+    }
+
+    // create modal
+    const modal = new ModalBuilder()
+        .setCustomId(`append-incident-modal:${id}`)
+        .setTitle("Add Append to Incident");
+
+    const appendText = new LabelBuilder()
+        .setLabel("Message:")
+        .setDescription("Enter the message to append to the incident.")
+        .setTextInputComponent(
+            new TextInputBuilder()
+                .setCustomId("append-message")
+                .setPlaceholder("Message to append")
+                .setRequired(true)
+                .setMinLength(1)
+                .setMaxLength(1000)
+                .setStyle(TextInputStyle.Paragraph)
+        );
+
+    modal.addLabelComponents(appendText);
+
+    await interaction.showModal(modal);
+}
+
+export async function handleModalSubmit(interaction: ModalSubmitInteraction) {
+    if (!interaction.customId.startsWith("append-incident-modal")) return
+
+    if (!interaction.guildId) {
+        await interaction.reply({
+            components: [new ContainerBuilder().addTextDisplayComponents(new TextDisplayBuilder().setContent("This command can only be used in a server."))],
+            flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral,
+        });
+        return;
+    }
+
+    const appendMessage = interaction.fields.getTextInputValue("append-message");
+    const id = parseInt(interaction.customId.split(":")[1]!);
+    if (!id) return;
+
+    const incident = await Incident.findOne({ where: { id: id } });
+    if(!incident) return;
+
+    const previousAppends: Appends[] = await Appends.findAll({ where: { incidentId: id } });
+
+    try {
+        await Appends.create({
+            incidentId: incident.id,
+            text: appendMessage
+        })
+    } catch (error) {
+        console.error("Error creating append:", error);
+        await interaction.reply({
+            components: [new ContainerBuilder().addTextDisplayComponents(new TextDisplayBuilder().setContent("There was an error adding the append to the incident."))],
+            flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral,
+        });
+        return;
+    }
+
+    const config = await Config.findOne({ where: { guildId: interaction.guildId! } });
+    if (!config) return;
+
+    const channel = await interaction.client.channels.fetch(config.channelId);
+    if (!channel || !channel.isSendable()) {
+        await interaction.reply({
+            components: [new ContainerBuilder().addTextDisplayComponents(new TextDisplayBuilder().setContent("Channel not found or not sendable."))],
+            flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral,
+        });
+        return;
+    }
+
+    try {
+        const message = await channel.messages.fetch(incident.messageId!);
+
+        const container = new ContainerBuilder()
+            .addTextDisplayComponents(new TextDisplayBuilder().setContent(`### #${incident.id} Incident\n## ${incident.title}`))
+            .addSeparatorComponents(new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small))
+            .addTextDisplayComponents(new TextDisplayBuilder().setContent(incident.description));
+
+        for (const append of previousAppends) {
+            container
+                .addSeparatorComponents(new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small))
+                .addTextDisplayComponents(new TextDisplayBuilder().setContent(append.text));
+        }
+
+        container
+            .addSeparatorComponents(new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small))
+            .addTextDisplayComponents(new TextDisplayBuilder().setContent(appendMessage))
+            .setAccentColor(0xF8312F);
+
+        await message.edit({ components: [container], flags: MessageFlags.IsComponentsV2 });
+    } catch (error) {
+        console.error("Error updating incident message:", error);
+        await interaction.reply({
+            components: [new ContainerBuilder().addTextDisplayComponents(new TextDisplayBuilder().setContent("There was an error updating the incident message."))],
+            flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral,
+        });
+        return;
+    }
+
+    await interaction.reply({
+        components: [new ContainerBuilder().addTextDisplayComponents(new TextDisplayBuilder().setContent("Append added to incident successfully.")).setAccentColor(0x57F287)],
+        flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral,
+    });
 }
