@@ -7,7 +7,10 @@ import {
     ModalBuilder,
     RoleSelectMenuBuilder,
     SlashCommandBuilder,
-    type ModalSubmitInteraction, TextDisplayBuilder, ContainerBuilder,
+    type ModalSubmitInteraction,
+    TextDisplayBuilder,
+    ContainerBuilder,
+    PermissionFlagsBits
 } from "discord.js";
 import { Config } from "../Database/Models/Config";
 
@@ -33,7 +36,24 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
         return;
     }
+    // permission check
+    if (!interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)) {
+        const NoPermissionTextComponent = new TextDisplayBuilder()
+            .setContent("You dont have Permission to use this command.");
+        const NoPermissionContainer = new ContainerBuilder()
+            .addTextDisplayComponents(NoPermissionTextComponent)
 
+        try {
+            await interaction.reply({
+                components: [NoPermissionContainer],
+                flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral
+            });
+        } catch (error) {
+            console.error("Error:", error);
+        }
+
+        return;
+    }
 
     const modal = new ModalBuilder()
         .setCustomId("config-modal")
@@ -68,6 +88,8 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
     await interaction.showModal(modal);
 }
+
+export default execute
 
 export async function handleModalSubmit(interaction: ModalSubmitInteraction) {
     if (interaction.customId !== "config-modal") return;
