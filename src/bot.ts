@@ -1,5 +1,5 @@
 import { Cluster } from "galactic.ts";
-import { Client, GatewayIntentBits, type ClientOptions, MessageFlags } from "discord.js";
+import { Client, GatewayIntentBits, type ClientOptions, MessageFlags, Events } from "discord.js";
 import { loadCommands, commands } from "./Utils/CommandBuilder";
 import { loadSubCommands } from "./Utils/SubCommandBuilder";
 import { db } from "./Database/DatabaseManager";
@@ -27,7 +27,7 @@ const client = new ExtendedClient(
 
 cluster.client = client;
 
-client.once("clientReady", async () => {
+client.once(Events.ClientReady, async () => {
     // database
     try {
         await db.init();
@@ -49,7 +49,7 @@ client.once("clientReady", async () => {
 });
 
 // interaction handler
-client.on("interactionCreate", async (interaction) => {
+client.on(Events.InteractionCreate, async (interaction) => {
     if (interaction.isModalSubmit()) {
         await handleModalSubmit(interaction);
         return;
