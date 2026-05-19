@@ -6,7 +6,9 @@
     "start": "bun dist/index.mjs",
     "build": "tsdown",
     "dev": "bun src/index.ts",
-    "dev:win": "bun src/windows-dev.ts"
+    "dev:win": "bun src/windows-dev.ts",
+    "lint": "biome check src",
+    "lint:fix": "biome check src --write"
   },
   "dependencies": {
     "discord.js": "^14.26.4",
@@ -16,6 +18,7 @@
     "typescript": "^6.0.3"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.4.15",
     "@types/bun": "latest",
     "tsdown": "^0.22.0"
   }

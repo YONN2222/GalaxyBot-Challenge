@@ -1,7 +1,5 @@
-import {
-    SlashCommandBuilder,
-} from "discord.js"
+import { SlashCommandBuilder } from "discord.js";
 
 export const data = new SlashCommandBuilder()
-    .setName("incident")
-    .setDescription("Manage incidents")
+  .setName("incident")
+  .setDescription("Manage incidents");
