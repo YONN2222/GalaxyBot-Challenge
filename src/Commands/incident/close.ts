@@ -36,14 +36,6 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     if (!id) return;
 
     const incident = await Incident.findOne({ where: { id: id } });
-    const channel = await interaction.guild?.channels.fetch(config!.channelId);
-    if (!channel || !channel.isSendable()) {
-        await interaction.reply({
-            content: "Channel not found or not sendable.",
-            flags: MessageFlags.Ephemeral,
-        })
-        return
-    };
 
     if (!incident) {
         await interaction.reply({
@@ -59,6 +51,15 @@ export async function execute(interaction: ChatInputCommandInteraction) {
             flags: MessageFlags.Ephemeral,
         });
         return;
+    }
+
+    const channel = await interaction.guild?.channels.fetch(config!.channelId);
+    if (!channel || !channel.isSendable()) {
+        await interaction.reply({
+            content: "Channel not found or not sendable.",
+            flags: MessageFlags.Ephemeral,
+        })
+        return
     }
 
     try {
