@@ -7,6 +7,7 @@ import {
 	SlashCommandSubcommandBuilder,
 	TextDisplayBuilder,
 } from "discord.js";
+import { Appends } from "../../Database/Models/Appends";
 import { Config } from "../../Database/Models/Config";
 import { Incident } from "../../Database/Models/Incident";
 import {
@@ -94,6 +95,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 	try {
 		await incident.update({ status: "closed" });
 		const message = await channel.messages.fetch(incident.messageId);
+		const appends = await Appends.findAll({
+			where: { incidentId: incident.id },
+		});
+
 		const IncidentContainer = new ContainerBuilder()
 			.addTextDisplayComponents(
 				new TextDisplayBuilder().setContent(
@@ -105,8 +110,17 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 			)
 			.addTextDisplayComponents(
 				new TextDisplayBuilder().setContent(incident.description),
-			)
-			.setAccentColor(0x57f287);
+			);
+
+		for (const append of appends) {
+			IncidentContainer.addSeparatorComponents(
+				new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small),
+			).addTextDisplayComponents(
+				new TextDisplayBuilder().setContent(append.text),
+			);
+		}
+
+		IncidentContainer.setAccentColor(0x57f287);
 
 		await message?.edit({
 			components: [IncidentContainer],

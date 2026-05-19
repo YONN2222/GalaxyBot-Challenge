@@ -54,7 +54,13 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
 	if (!incident) {
 		await interaction.reply({
-			components: [new ContainerBuilder().addTextDisplayComponents(new TextDisplayBuilder().setContent("Incident not found.")).setAccentColor(0xED4245)],
+			components: [
+				new ContainerBuilder()
+					.addTextDisplayComponents(
+						new TextDisplayBuilder().setContent("Incident not found."),
+					)
+					.setAccentColor(0xed4245),
+			],
 			flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral,
 		});
 		return;
@@ -62,7 +68,13 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
 	if (incident.status === "closed") {
 		await interaction.reply({
-			components: [new ContainerBuilder().addTextDisplayComponents(new TextDisplayBuilder().setContent("Incident is already closed.")).setAccentColor(0xED4245)],
+			components: [
+				new ContainerBuilder()
+					.addTextDisplayComponents(
+						new TextDisplayBuilder().setContent("Incident is already closed."),
+					)
+					.setAccentColor(0xed4245),
+			],
 			flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral,
 		});
 		return;
