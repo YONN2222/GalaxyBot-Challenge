@@ -28,7 +28,7 @@ export const data = new SlashCommandSubcommandBuilder()
 	.addIntegerOption((option) =>
 		option
 			.setName("id")
-			.setDescription("The ID of the incident to close")
+			.setDescription("The ID of the incident")
 			.setRequired(true),
 	);
 

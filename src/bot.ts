@@ -73,7 +73,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
 	);
 	if (!command) {
 		await interaction.reply({
-			content: "Unknown Command ",
+			content: "Unknown Command",
 			flags: MessageFlags.Ephemeral,
 		});
 		return;
