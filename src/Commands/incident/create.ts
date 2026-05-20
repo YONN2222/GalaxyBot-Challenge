@@ -19,6 +19,7 @@ import {
 	GuildCheck,
 	IncidentPermissionCheck,
 } from "../../Utils/Checks";
+import { formatDiscordTime } from "../../Utils/DiscordTimestamp";
 
 export const data = new SlashCommandSubcommandBuilder()
 	.setName("create")
@@ -158,7 +159,11 @@ export async function handleModalSubmit(interaction: ModalSubmitInteraction) {
 		.addSeparatorComponents(
 			new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small),
 		)
-		.addTextDisplayComponents(new TextDisplayBuilder().setContent(description))
+		.addTextDisplayComponents(
+			new TextDisplayBuilder().setContent(
+				`[${formatDiscordTime(incident.createdAt)}] ${description}`,
+			),
+		)
 		.setAccentColor(0xf8312f);
 
 	try {

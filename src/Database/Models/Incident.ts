@@ -17,6 +17,8 @@ export class Incident extends Model<
 	declare description: string;
 	declare messageId: CreationOptional<string>;
 	declare status: "open" | "closed" | "appended";
+	declare createdAt: CreationOptional<Date>;
+	declare updatedAt: CreationOptional<Date>;
 
 	static initialize(sequelize: Sequelize) {
 		Incident.init(
@@ -33,6 +35,8 @@ export class Incident extends Model<
 						isIn: [["open", "closed", "appended"]],
 					},
 				},
+				createdAt: { type: DataTypes.DATE, allowNull: false },
+				updatedAt: { type: DataTypes.DATE, allowNull: false },
 			},
 			{
 				sequelize,

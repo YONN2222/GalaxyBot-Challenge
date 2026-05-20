@@ -15,6 +15,7 @@ import {
 	GuildCheck,
 	IncidentPermissionCheck,
 } from "../../Utils/Checks";
+import { formatDiscordTime } from "../../Utils/DiscordTimestamp";
 
 export const data = new SlashCommandSubcommandBuilder()
 	.setName("close")
@@ -97,6 +98,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 		const message = await channel.messages.fetch(incident.messageId);
 		const appends = await Appends.findAll({
 			where: { incidentId: incident.id },
+			order: [["createdAt", "ASC"]],
 		});
 
 		const IncidentContainer = new ContainerBuilder()
@@ -109,14 +111,18 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 				new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small),
 			)
 			.addTextDisplayComponents(
-				new TextDisplayBuilder().setContent(incident.description),
+				new TextDisplayBuilder().setContent(
+					`[${formatDiscordTime(incident.createdAt)}] ${incident.description}`,
+				),
 			);
 
 		for (const append of appends) {
 			IncidentContainer.addSeparatorComponents(
 				new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small),
 			).addTextDisplayComponents(
-				new TextDisplayBuilder().setContent(append.text),
+				new TextDisplayBuilder().setContent(
+					`[${formatDiscordTime(append.createdAt)}] ${append.text}`,
+				),
 			);
 		}
 

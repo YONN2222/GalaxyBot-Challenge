@@ -20,6 +20,7 @@ import {
 	GuildCheck,
 	IncidentPermissionCheck,
 } from "../../Utils/Checks";
+import { formatDiscordTime } from "../../Utils/DiscordTimestamp";
 
 export const data = new SlashCommandSubcommandBuilder()
 	.setName("append")
@@ -131,10 +132,12 @@ export async function handleModalSubmit(interaction: ModalSubmitInteraction) {
 
 	const previousAppends: Appends[] = await Appends.findAll({
 		where: { incidentId: id },
+		order: [["createdAt", "ASC"]],
 	});
 
+	let createdAppend: Appends;
 	try {
-		await Appends.create({
+		createdAppend = await Appends.create({
 			incidentId: incident.id,
 			text: appendMessage,
 		});
@@ -193,7 +196,9 @@ export async function handleModalSubmit(interaction: ModalSubmitInteraction) {
 				new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small),
 			)
 			.addTextDisplayComponents(
-				new TextDisplayBuilder().setContent(incident.description),
+				new TextDisplayBuilder().setContent(
+					`[${formatDiscordTime(incident.createdAt)}] ${incident.description}`,
+				),
 			);
 
 		for (const append of previousAppends) {
@@ -202,7 +207,9 @@ export async function handleModalSubmit(interaction: ModalSubmitInteraction) {
 					new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small),
 				)
 				.addTextDisplayComponents(
-					new TextDisplayBuilder().setContent(append.text),
+					new TextDisplayBuilder().setContent(
+						`[${formatDiscordTime(append.createdAt)}] ${append.text}`,
+					),
 				);
 		}
 
@@ -211,7 +218,9 @@ export async function handleModalSubmit(interaction: ModalSubmitInteraction) {
 				new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small),
 			)
 			.addTextDisplayComponents(
-				new TextDisplayBuilder().setContent(appendMessage),
+				new TextDisplayBuilder().setContent(
+					`[${formatDiscordTime(createdAppend.createdAt)}] ${appendMessage}`,
+				),
 			)
 			.setAccentColor(0xf8312f);
 
